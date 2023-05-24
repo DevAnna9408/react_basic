@@ -104,17 +104,36 @@ function App() {
     })
 
     content = <Article title = {title} body = {body}/>
-    contextControl = <li>
-      <a
-          href={"/update/" + id}
-          onClick={event => {
-            event.preventDefault()
-            setMode('UPDATE')
-          }}
-      >
-        Update
-      </a>
-    </li>
+    contextControl =
+    <>
+        <li>
+          <a
+              href={"/update/" + id}
+              onClick={event => {
+                event.preventDefault()
+                setMode('UPDATE')
+              }}
+          >
+            Update
+          </a>
+        </li>
+        <li>
+            <input
+                type={"button"}
+                value={"Delete"}
+                onClick={ () => {
+                    const newTopics = []
+                    topics.forEach(c => {
+                        if (c.id !== id) {
+                            newTopics.push(c)
+                        }
+                    })
+                    setTopics(newTopics)
+                    setMode('WELCOME')
+                }}
+            />
+        </li>
+    </>
 
   } else if (mode === 'CREATE') {
     content = <Create
@@ -128,8 +147,31 @@ function App() {
                   setNextId(nextId + 1)
                 }}
     />
-  } else if(mode === 'UDPATE') {
-    content = <Update />
+  } else if(mode === 'UPDATE') {
+      let title, body = null
+
+      topics.forEach(c => {
+          if(c.id === id) {
+              title = c.title
+              body = c.body
+          }
+      })
+    content = <Update
+        title = {title}
+        body = {body}
+        onUpdate = {(title, body) => {
+            const newTopic = { id: id, title: title, body:body }
+            const newTopics = [...topics]
+            for(let i=0; i < newTopics.length; i++){
+                if(newTopics[i].id === id) {
+                    newTopics[i] = newTopic
+                    break
+                }
+            }
+            setTopics(newTopics)
+            setMode('READ')
+        }}
+    />
   }
 
   function Create (props) {
@@ -156,7 +198,7 @@ function App() {
           <p>
             <input
                 type={"submit"}
-                value={"Update"}/>
+                value={"create"}/>
           </p>
         </form>
       </article>
@@ -164,6 +206,8 @@ function App() {
   }
 
   function Update (props) {
+      const [title, setTitle] = useState(props.title)
+      const [body, setBody] = useState(props.body)
     return(
         <article>
           <h2>Update</h2>
@@ -177,17 +221,28 @@ function App() {
               <input
                   type={"text"}
                   name={"title"}
-                  placeholder={"title"} />
+                  placeholder={"title"}
+                  value={title}
+                  onChange={event => {
+                      setTitle(event.target.value)
+                  }}
+              />
             </p>
             <p>
             <textarea
                 name={"body"}
-                placeholder={"body"}/>
+                placeholder={"body"}
+                value={body}
+                onChange={event => {
+                    setBody(event.target.value)
+                }}
+            />
             </p>
             <p>
               <input
                   type={"submit"}
-                  value={"create"}/>
+                  value={"Update"}
+              />
             </p>
           </form>
         </article>
